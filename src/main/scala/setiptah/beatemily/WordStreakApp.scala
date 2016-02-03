@@ -74,7 +74,7 @@ object WordStreakApp extends App {
   }
 
   //val demoBoard = getRandomBoard
-  val demoBoard = getLetterBoard("FTHSAAROWEDAHRTO", 4)
+  val demoBoard = getLetterBoard("SSFLESONWTNDHAIE", 4)
 
   //val demoWords = getDemoWords
   val demoWords = getFileWords("wordsEn.txt")
@@ -86,5 +86,10 @@ object WordStreakApp extends App {
 
   val found = WordStreakAlgorithm.findAllWords(demoBoard)(dictionary)
 
-  found.foreach { println }
+  for ( t <- found.keys ) {
+
+    println("")
+    println(t)
+    found(t).filter( w => w.length >= 4 ).foreach(println)
+  }
 }

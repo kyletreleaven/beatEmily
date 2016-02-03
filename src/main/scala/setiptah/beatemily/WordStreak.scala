@@ -1,5 +1,6 @@
 package setiptah.beatemily
 
+import scala.collection
 import scala.collection.mutable
 //import scala.collection.immutable
 
@@ -22,7 +23,8 @@ object WordStreakAlgorithm {
   case class SearchState(
                           val wordSoFar: String,
                           val cellsUsed: List[List[Boolean]],
-                          val nextCell: (Int,Int))
+                          val nextCell: (Int,Int),
+                          val start: (Int,Int))
 
   /*
   def getActions(cursor: SearchState, board: Array[Array[Char]], dictionary: DictionaryTree) = {
@@ -51,10 +53,7 @@ object WordStreakAlgorithm {
   }
   */
 
-  def findAllWords(board: Array[Array[Char]])(dictionary: DictionaryTree) : Array[String] = {
-
-    val words = mutable.ArrayBuffer.empty[String]
-    val wordSet = mutable.HashSet.empty[String]
+  def findAllWords(board: Array[Array[Char]])(dictionary: DictionaryTree) : collection.Map[(Int, Int), Array[String]] = {
 
     val searchStack = new mutable.Stack[SearchState]
     
@@ -63,12 +62,19 @@ object WordStreakAlgorithm {
 
     val grid = Board(nrow,ncol)
 
+    val words = mutable.Map.empty[(Int,Int),mutable.ArrayBuffer[String]]
+    val wordSet = mutable.HashSet.empty[String]
+
     // populate search queue with all possible starts
     val freshStart = Array.fill(nrow,ncol)(false).toList.map { vec => vec.toList }
 
     for ( i <- 0 until nrow ) {
       for ( j <- 0 until ncol ) {
-        val cursor = SearchState("",freshStart,(i,j))
+        val addr = (i,j)
+
+        words(addr) = mutable.ArrayBuffer.empty[String]
+
+        val cursor = SearchState("",freshStart,addr,addr)
 
         searchStack.push(cursor)
       }
@@ -93,7 +99,7 @@ object WordStreakAlgorithm {
       if (dictionary.isWord(word)) {
         if ( !wordSet.contains(word) ) {
           wordSet += word
-          words += word
+          words(cursor.start) += word
         }
       }
 
@@ -105,7 +111,7 @@ object WordStreakAlgorithm {
 
         for ( nextCell <- validMoves ) {
 
-          val newSearch = SearchState(word,cellsUsed,nextCell)
+          val newSearch = SearchState(word,cellsUsed,nextCell,cursor.start)
 
           searchStack.push(newSearch)
         }
@@ -113,6 +119,6 @@ object WordStreakAlgorithm {
       }
     }
 
-    return words.toArray
+    return words.mapValues { value => value.toArray }
   }
 }
