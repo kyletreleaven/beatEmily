@@ -6,6 +6,8 @@ import javax.swing.GroupLayout.Alignment
 import javax.swing._
 import javax.swing.SwingUtilities
 
+import scala.collection.mutable
+
 /**
   * Created by ktreleaven on 2/3/2016.
   */
@@ -44,7 +46,31 @@ class WordStreakFrame extends JFrame("Word Streak") {
   val bigFont = oldFont.deriveFont(20)
   label.setFont(bigFont)
 
-  label.setText(words.next())
+  def getMore[T](iter: Iterator[T], n: Int) : List[T] = {
+    val ret = mutable.ListBuffer.empty[T]
+
+    for ( k <- 0 until n ) {
+      if (iter.hasNext) {
+        ret += iter.next()
+      }
+    }
+
+    return ret.toList
+  }
+
+  def setNextLabel : Unit = {
+    if (words.hasNext) {
+
+      val nextWords = getMore(words, 4)
+      val nextLabelText = nextWords.mkString(" \n")
+
+      label.setText( nextLabelText )
+    }
+
+    else {
+      label.setText("")
+    }
+  }
 
   val btn = new JButton("Next")
 
@@ -53,19 +79,15 @@ class WordStreakFrame extends JFrame("Word Streak") {
   add(label,BorderLayout.CENTER)
   add(btn,BorderLayout.SOUTH)
 
-
   btn.addActionListener(new ActionListener {
     override def actionPerformed(e: ActionEvent): Unit = {
 
-      if (words.hasNext) {
-        label.setText(words.next())
-      }
+      setNextLabel
 
-      else {
-        label.setText("")
-      }
     }
   })
+
+  setNextLabel
 
   setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
   setSize(400,300)
